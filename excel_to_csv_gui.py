@@ -10,6 +10,7 @@ from PyQt5.QtCore import Qt
 import pandas as pd
 from data_cleaner import DataCleaner
 import logging
+import traceback
 
 def get_config_path(config_name="config.ini"):
     """动态获取配置文件路径（兼容打包环境）"""
@@ -299,10 +300,12 @@ class ExcelToCSVApp(QMainWindow):
     
     def handle_conversion_error(self, error: Exception):
         """处理转换错误"""
+        # 输出详细traceback到日志
+        self.logger.error("转换失败详细信息：\n" + traceback.format_exc())
         QMessageBox.critical(
             self, "错误", 
             f"转换失败：{str(error)}\n"
-            f"请确保Excel文件未被其他程序占用，且配置正确。"
+            f"请确保Excel文件未被其他程序占用，且配置正确。\n详细错误信息已写入日志文件。"
         )
 
 if __name__ == "__main__":

@@ -64,30 +64,25 @@ class DataCleaner:
         # 创建空DataFrame时直接使用配置的列顺序
         output_df = pd.DataFrame(columns=output_columns)
         
-        # 标准化原始列名（去除空格、转小写）
-        df_columns_clean = [col.strip().lower() for col in df.columns]
+        # 修正：对所有列名做str和空值判断，防止None或NaN导致strip报错
+        df_columns_clean = [str(col).strip().lower() for col in df.columns if pd.notna(col)]
         
         # 处理列映射
         if column_mapping:
             for src_col, dest_col in column_mapping.items():
-                # 标准化配置中的源列名
                 src_col_clean = src_col.strip().lower()
-                
                 if src_col_clean in df_columns_clean:
-                    # 获取实际列名（保留原始大小写）
                     actual_src_col = df.columns[df_columns_clean.index(src_col_clean)]
                     output_df[dest_col] = df[actual_src_col]
                 else:
-                    output_df[dest_col] = ""
-                    self.logger.warning(f"映射失败：Sheet '{sheet_name}' 中不存在列 '{src_col}'")
+                    # 如果原始数据有目标列，直接保留
+                    if dest_col in df.columns:
+                        output_df[dest_col] = df[dest_col]
+                    else:
+                        output_df[dest_col] = ""
+                    self.logger.warning(f"映射失败：Sheet '{sheet_name}' 中不存在列 '{src_col}'，已保留原始数据（如有）")
         self.logger.info(f"输出列顺序: {output_columns}")
         self.logger.info(f"处理后的数据列: {output_df.columns.tolist()}")
-        
-        # 合并模糊映射生成的新列
-        #output_columns = list(output_columns)  # 转换为可修改列表
-        #for col in df.columns:
-        #    if col not in output_columns and col not in column_mapping.values():
-        #        output_columns.append(col)  # 追加新列到输出列表
         
         # 按最终列顺序重建DataFrame
         output_df = df.reindex(columns=output_columns)

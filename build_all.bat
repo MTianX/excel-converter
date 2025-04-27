@@ -7,6 +7,9 @@ pyinstaller --noconsole --onefile --add-data "config.ini;." --add-data "requirem
 REM 打包 config_maintainer.py
 pyinstaller --noconsole --onefile --add-data "config.ini;." --add-data "requirements.txt;." config_maintainer.py
 
+REM 打包 excel_audit_tool.py
+pyinstaller --noconsole --onefile  --add-data "requirements.txt;." excel_audit_tool.py
+
 echo.
 echo 打包完成！可执行文件在 dist 目录下。
 pause
